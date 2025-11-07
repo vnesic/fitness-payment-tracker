@@ -90,7 +90,7 @@ function App() {
   return (
     <div className="App">
       <header className="app-header">
-        <h1>💪 Fitness Payment Tracker</h1>
+        <h1>Fitness Payment Tracker</h1>
       </header>
 
       <nav className="app-nav">
@@ -125,7 +125,7 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>💪 Fitness Payment Tracker | Automated SMS Reminders</p>
+        <p>Fitness Payment Tracker | Automated SMS Reminders</p>
       </footer>
     </div>
   );
