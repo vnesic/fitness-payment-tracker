@@ -10,29 +10,25 @@ const app = express();
 // CORS configuration - Allow all origins in development, specific origins in production
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
+// CORS configuration - Accept all Vercel URLs
 const corsOptions = {
   origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-    
-    // In development, allow all origins
-    if (isDevelopment) {
+    // Allow requests with no origin (Postman, curl, mobile apps)
+    if (!origin) {
       return callback(null, true);
     }
     
-    // In production, check against allowed origins
-    const allowedOrigins = [
-      process.env.FRONTEND_URL,
-      'http://localhost:3000',
-      'http://localhost:3001'
-    ].filter(Boolean); // Remove any undefined values
+    // Check if it's a Vercel URL or localhost
+    const isVercel = /^https:\/\/.*\.vercel\.app$/.test(origin);
+    const isLocalhost = /^http:\/\/localhost(:\d+)?$/.test(origin);
     
-    if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
-      callback(null, true);
-    } else {
-      console.log('⚠️  CORS blocked origin:', origin);
-      callback(null, true); // Allow anyway but log it
+    if (isVercel || isLocalhost) {
+      return callback(null, true);  // Allow silently
     }
+    
+    // For any other origin, allow but log (for debugging)
+    console.log('⚠️  Unexpected origin:', origin);
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
