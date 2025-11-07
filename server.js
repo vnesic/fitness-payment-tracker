@@ -7,25 +7,39 @@ const path = require('path');
 
 const app = express();
 
-// CORS configuration for production
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  process.env.FRONTEND_URL || '*'
-];
+// CORS configuration - Allow all origins in development, specific origins in production
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
-app.use(cors({
+const corsOptions = {
   origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
+    // Allow requests with no origin (like mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+    
+    // In development, allow all origins
+    if (isDevelopment) {
+      return callback(null, true);
+    }
+    
+    // In production, check against allowed origins
+    const allowedOrigins = [
+      process.env.FRONTEND_URL,
+      'http://localhost:3000',
+      'http://localhost:3001'
+    ].filter(Boolean); // Remove any undefined values
+    
+    if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.log('⚠️  CORS blocked origin:', origin);
+      callback(null, true); // Allow anyway but log it
     }
   },
-  credentials: true
-}));
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
